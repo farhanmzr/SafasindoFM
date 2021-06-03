@@ -10,107 +10,95 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-public class StreamingService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnInfoListener,
-        MediaPlayer.OnBufferingUpdateListener {
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.metadata.Metadata;
 
-    //player
-    private MediaPlayer mediaPlayer = new MediaPlayer();
+public class StreamingService extends Service {
 
     //phone
     private boolean isPausedCall = false;
 
-    //receiver
-    private BroadcastReceiver broadcastReceiver;
-    private IntentFilter filter;
+    //player
+    // Update sultannamja
+    SimpleExoPlayer simpleExoPlayer;
+
+    private final String url = "http://radio.safasindo.com:7044/;stream.pls";
+    private final String name = "RADIO SAFASINDO 98.2 FM";
 
     @Override
     public void onCreate() {
 
-        //init receiver
-        filter = new IntentFilter();
-        filter.addAction("exit");
-        filter.addAction("playpause");
-        broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (action.equals("playpause")) {
-                    if (mediaPlayer != null) {
-                        if (mediaPlayer.isPlaying())
-                            pauseMedia();
-                        else
-                            playMedia();
-                    }
-                } else if (action.equals("exit")) {
-                    stopSelf();
-                }
-            }
-        };
+        simpleExoPlayer = new SimpleExoPlayer.Builder(this).build();
 
-        registerReceiver(broadcastReceiver, filter);
-        mediaPlayer.setOnCompletionListener(this);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnErrorListener(this);
-        mediaPlayer.setOnSeekCompleteListener(this);
-        mediaPlayer.setOnInfoListener(this);
-        mediaPlayer.setOnBufferingUpdateListener(this);
-        mediaPlayer.reset();
+        if (!simpleExoPlayer.isPlaying()) {
+            playMedia();
+        }
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         initIfPhoneCall();
-        showNotif(intent.getExtras().getString("name"));
-        mediaPlayer.reset();
-        if (!mediaPlayer.isPlaying()) {
-            try {
-                mediaPlayer.setDataSource(String.valueOf(Uri.parse(intent.getExtras().getString("url"))));
-                mediaPlayer.prepareAsync();
-            } catch (Exception e) {
-                e.printStackTrace();
+        showNotif(name);
+
+        if(intent.getAction() != null && intent.getAction().equals("exit")) {
+            stopSelf();
+        } else if (intent.getAction() != null && intent.getAction().equals("playpause")) {
+            if (simpleExoPlayer.isPlaying()) {
+                simpleExoPlayer.pause();
+            } else {
+                playMedia();
             }
         }
+
+
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mediaPlayer != null) {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
+        if (simpleExoPlayer != null) {
+            if (simpleExoPlayer.isPlaying()) {
+                simpleExoPlayer.stop();
             }
-            mediaPlayer.release();
+            simpleExoPlayer.release();
         }
-        unregisterReceiver(broadcastReceiver);
         hideNotif();
     }
 
     private void playMedia() {
-        if (!mediaPlayer.isPlaying()) {
-            mediaPlayer.start();
-            Toast.makeText(this, "mediaStart", Toast.LENGTH_SHORT).show();
+        if (!simpleExoPlayer.isPlaying()) {
+            MediaItem mediaItem = MediaItem.fromUri(url);
+            simpleExoPlayer.setMediaItem(mediaItem);
+            simpleExoPlayer.setPlayWhenReady(true);
+            simpleExoPlayer.prepare();
+            simpleExoPlayer.play();
         }
     }
 
     private void stopMedia() {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
+        if (simpleExoPlayer.isPlaying()) {
+            simpleExoPlayer.stop();
         }
     }
 
     private void pauseMedia() {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
+        if (simpleExoPlayer.isPlaying()) {
+            simpleExoPlayer.setPlayWhenReady(false);
+            simpleExoPlayer.pause();
         }
     }
 
@@ -123,13 +111,13 @@ public class StreamingService extends Service implements MediaPlayer.OnCompletio
                 switch (state) {
                     case TelephonyManager.CALL_STATE_OFFHOOK:
                     case TelephonyManager.CALL_STATE_RINGING:
-                        if (mediaPlayer != null) {
+                        if (simpleExoPlayer != null) {
                             pauseMedia();
                             isPausedCall = true;
                         }
                         break;
                     case TelephonyManager.CALL_STATE_IDLE:
-                        if (mediaPlayer != null) {
+                        if (simpleExoPlayer != null) {
                             if (isPausedCall) {
                                 isPausedCall = false;
                                 playMedia();
@@ -155,13 +143,13 @@ public class StreamingService extends Service implements MediaPlayer.OnCompletio
             notificationManager.createNotificationChannel(mChannel);
         }
 
-        Intent stopIntent = new Intent(this, StreamingReceiver.class);
+        Intent stopIntent = new Intent(this, StreamingService.class);
         stopIntent.setAction("exit");
-        PendingIntent stopPendingIntent = PendingIntent.getBroadcast(this, 12345, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent stopPendingIntent = PendingIntent.getService(this, 12345, stopIntent, 0);
 
-        Intent playIntent = new Intent(this, StreamingReceiver.class);
+        Intent playIntent = new Intent(this, StreamingService.class);
         playIntent.setAction("playpause");
-        PendingIntent playPendingIntent = PendingIntent.getBroadcast(this, 12345, playIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent playPendingIntent = PendingIntent.getService(this, 12345, playIntent, 0);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
         builder.setSmallIcon(android.R.drawable.ic_media_play)
@@ -180,7 +168,7 @@ public class StreamingService extends Service implements MediaPlayer.OnCompletio
         notificationManager.cancel(115);
     }
 
-    @Override
+    /*@Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
 
     }
@@ -209,7 +197,8 @@ public class StreamingService extends Service implements MediaPlayer.OnCompletio
     @Override
     public void onSeekComplete(MediaPlayer mp) {
 
-    }
+    }*/
+
 
     @Nullable
     @Override
