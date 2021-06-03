@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/streaming"
+        android:title="Streaming"
+        android:icon="@drawable/navbar_streaming_selector" />
+
+    <item
+        android:id="@+id/sosmed"
+        android:title="Sosial Media"
+        android:icon="@drawable/navbar_sosmed_selector" />
+
+    <item
+        android:id="@+id/profile"
+        android:title="Profile"
+        android:icon="@drawable/navbar_profile_selector" />
+
+</menu>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="tab_spacing_vertical">3dp</dimen>
+    <dimen name="tab_spacing_horizontal">12dp</dimen>
+    <dimen name="tab_spacing_margin">12dp</dimen>
+</resources>
