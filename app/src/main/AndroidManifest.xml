@@ -32,12 +32,6 @@
 
         <!-- Update sultannamja -->
         <service android:name=".Service.StreamingService" android:exported="false" />
-        <receiver android:name=".Service.StreamingReceiver" android:exported="true">
-            <intent-filter>
-                <action android:name="exit"/>
-                <action android:name="playpause" />
-            </intent-filter>
-        </receiver>
 
 
     </application>

@@ -2,17 +2,13 @@ package com.aksantara.safasindofm;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.FragmentManager;
 
 import android.app.Activity;
-import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,52 +16,38 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.NumberPicker;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.aksantara.safasindofm.Service.StreamingService;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.util.Util;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Calendar;
 
 public class MainActivity extends Activity {
 
-    private ImageView imgRotation, btnPause, btnPlay, btnShare;
+    private static ImageView imgRotation;
+    private static ImageView btnPlayPause;
+    private static String statusPlay = "pause";
+    private ImageView btnShare;
 
     private int hoursValue, minutesValue;
     private MediaPlayer mediaPlayer;
     private String url = "http://radio.safasindo.com:7044/;stream.pls";
     private String name = "RADIO SAFASINDO 98.2 FM";
 
+    static RotateAnimation rotate;
+
+    private static SharedPreferences sharedPref;
+    Context context;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mediaPlayer = new MediaPlayer();
+
+        context = getApplicationContext();
+        sharedPref = context.getSharedPreferences("safasindo", Context.MODE_PRIVATE);
 
         initUI();
         bottomNav();
@@ -74,13 +56,12 @@ public class MainActivity extends Activity {
 
     private void initUI() {
 
-        RotateAnimation rotate = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        rotate = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         rotate.setDuration(5000);
         rotate.setRepeatCount(Animation.INFINITE);
         rotate.setInterpolator(new LinearInterpolator());
 
-        btnPause = findViewById(R.id.btnPause);
-        btnPlay = findViewById(R.id.btnPlay);
+        btnPlayPause = findViewById(R.id.btnPlayPause);
         btnShare = findViewById(R.id.btnShare);
         imgRotation = (ImageView) findViewById(R.id.imgRotation);
 
@@ -91,26 +72,60 @@ public class MainActivity extends Activity {
                 openDialogTime();
             }
         });
-        btnPlay.setOnClickListener(new View.OnClickListener() {
+        btnPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callRadio();
-                imgRotation.startAnimation(rotate);
-            }
-        });
-        btnPause.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imgRotation.clearAnimation();
+                if (statusPlay.equals("play")) {
+                    callRadio();
+                    pauseRadio();
+                } else if (statusPlay.equals("pause")) {
+                    callRadio();
+                    playRadio();
+                }
             }
         });
 
+        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences("safasindo", MODE_PRIVATE);
+
+        if (sharedPref.getBoolean("statusPlay", false)) {
+            playRadio();
+        } else {
+            pauseRadio();
+        }
+
+    }
+
+    public static void pauseRadio() {
+        statusPlay = "pause";
+
+        imgRotation.clearAnimation();
+        btnPlayPause.setImageResource(R.drawable.ic_btn_play);
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("statusPlay", false);
+        editor.apply();
+    }
+
+    public static void playRadio() {
+        statusPlay = "play";
+
+        imgRotation.startAnimation(rotate);
+        btnPlayPause.setImageResource(R.drawable.ic_btn_stop);
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("statusPlay", true);
+        editor.apply();
     }
 
     private void callRadio() {
         Bundle bundle = new Bundle();
         bundle.putString("url", url);
         bundle.putString("name", name);
+        if (statusPlay.equals("play")) {
+            bundle.putString("status", "play");
+        } else if (statusPlay.equals("pause")) {
+            bundle.putString("status", "pause");
+        }
         Intent serviceOn = new Intent(this, StreamingService.class);
         serviceOn.putExtras(bundle);
 
