@@ -7,6 +7,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
@@ -16,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.aksantara.safasindofm.MainActivity;
+import com.aksantara.safasindofm.R;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 
@@ -191,7 +193,9 @@ public class StreamingService extends Service {
         PendingIntent playPendingIntent = PendingIntent.getService(this, 12345, playIntent, 0);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
-        builder.setSmallIcon(android.R.drawable.ic_media_play)
+        builder.setSmallIcon(R.drawable.ic_stat_name)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
+                        R.mipmap.ic_launcher))
                 .setTicker("Listening " + name)
                 .setOngoing(true)
                 .setContentTitle(name)

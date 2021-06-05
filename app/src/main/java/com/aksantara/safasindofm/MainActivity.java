@@ -1,13 +1,12 @@
 package com.aksantara.safasindofm;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.MediaPlayer;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -15,23 +14,23 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aksantara.safasindofm.Service.ConnectivityReceiver;
+import com.aksantara.safasindofm.Service.MyApplication;
 import com.aksantara.safasindofm.Service.StreamingService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ConnectivityReceiver.ConnectivityReceiverListener {
 
     private static ImageView imgRotation;
     private static ImageView btnPlayPause;
     private static String statusPlay = "pause";
     private ImageView btnShare;
 
-    private int hoursValue, minutesValue;
-    private MediaPlayer mediaPlayer;
     private String url = "http://radio.safasindo.com:7044/;stream.pls";
     private String name = "RADIO SAFASINDO 98.2 FM";
 
@@ -44,10 +43,11 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mediaPlayer = new MediaPlayer();
 
         context = getApplicationContext();
         sharedPref = context.getSharedPreferences("safasindo", Context.MODE_PRIVATE);
+
+
 
         initUI();
         bottomNav();
@@ -62,6 +62,7 @@ public class MainActivity extends Activity {
         rotate.setInterpolator(new LinearInterpolator());
 
         btnPlayPause = findViewById(R.id.btnPlayPause);
+
         btnShare = findViewById(R.id.btnShare);
         imgRotation = (ImageView) findViewById(R.id.imgRotation);
 
@@ -69,12 +70,13 @@ public class MainActivity extends Activity {
         btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openDialogTime();
+
             }
         });
         btnPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 if (statusPlay.equals("play")) {
                     callRadio();
                     pauseRadio();
@@ -133,50 +135,6 @@ public class MainActivity extends Activity {
         Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
     }
 
-
-
-    private void openDialogTime() {
-
-        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        View view = getLayoutInflater().inflate(R.layout.dialog_timer_picker, null);
-        Button btnSimpan = view.findViewById(R.id.btnSimpan);
-        NumberPicker hoursPicker = view.findViewById(R.id.hoursPicker);
-        NumberPicker minutesPicker = view.findViewById(R.id.minutesPicker);
-
-        hoursPicker.setMinValue(0);
-        hoursPicker.setMaxValue(12);
-        hoursPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                hoursValue = hoursPicker.getValue();
-                Log.e("hoursValue", String.valueOf(hoursValue));
-            }
-        });
-
-        minutesPicker.setMinValue(0);
-        minutesPicker.setMaxValue(60);
-        minutesPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                minutesValue = minutesPicker.getValue();
-                Log.e("minutesValue", String.valueOf(minutesValue));
-            }
-        });
-
-        builder.setView(view);
-        final AlertDialog dialog = builder.create();
-        dialog.show();
-
-        btnSimpan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-    }
-
-
     private void bottomNav() {
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.navigation);
@@ -208,6 +166,43 @@ public class MainActivity extends Activity {
                 return false;
             }
         });
+    }
+
+    // Method to manually check connection status
+    private void checkConnection() {
+        boolean isConnected = ConnectivityReceiver.isConnected();
+        showSnack(isConnected);
+    }
+
+    @Override
+    public void onNetworkConnectionChanged(boolean isConnected) {
+        showSnack(isConnected);
+    }
+
+    // Showing the status in Snackbar
+    private void showSnack(boolean isConnected) {
+        String message = "Maaf, anda tidak terhubung dengan internet.";
+        if (isConnected) {
+
+        } else {
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+        }
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        checkConnection();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // register connection status listener
+        MyApplication.getInstance().setConnectivityListener(this);
     }
 
 }
