@@ -184,6 +184,10 @@ public class StreamingService extends Service {
             notificationManager.createNotificationChannel(mChannel);
         }
 
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent toMain =
+                PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
         Intent stopIntent = new Intent(this, StreamingService.class);
         stopIntent.setAction("exit");
         PendingIntent stopPendingIntent = PendingIntent.getService(this, 12345, stopIntent, 0);
@@ -199,6 +203,7 @@ public class StreamingService extends Service {
                 .setTicker("Listening " + name)
                 .setOngoing(true)
                 .setContentTitle(name)
+                .setContentIntent(toMain)
                 .setContentText("By Aksantara Digital")
                 .addAction(android.R.drawable.ic_media_play, "PLAY/PAUSE", playPendingIntent)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "EXIT", stopPendingIntent)

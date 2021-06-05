@@ -7,24 +7,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.provider.Settings;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.aksantara.safasindofm.Service.ConnectivityReceiver;
-import com.aksantara.safasindofm.Service.MyApplication;
+import com.aksantara.safasindofm.Service.NetworkUtils;
 import com.aksantara.safasindofm.Service.StreamingService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
-public class MainActivity extends Activity implements ConnectivityReceiver.ConnectivityReceiverListener {
+public class MainActivity extends Activity {
 
     private static ImageView imgRotation;
     private static ImageView btnPlayPause;
@@ -39,6 +40,10 @@ public class MainActivity extends Activity implements ConnectivityReceiver.Conne
     private static SharedPreferences sharedPref;
     Context context;
 
+    Snackbar snackbar;
+    Button btn_on_koneksi;
+    View custom_view;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,11 +52,75 @@ public class MainActivity extends Activity implements ConnectivityReceiver.Conne
         context = getApplicationContext();
         sharedPref = context.getSharedPreferences("safasindo", Context.MODE_PRIVATE);
 
+        btnPlayPause = findViewById(R.id.btnPlayPause);
+        btnShare = findViewById(R.id.btnShare);
+        imgRotation = (ImageView) findViewById(R.id.imgRotation);
+        btnShare = findViewById(R.id.btnShare);
 
+        initSnackbar();
+
+        // Cek terdapat Jaringan atau Tidak
+        NetworkUtils.checkNetworkInfo(this, new NetworkUtils.OnConnectionStatusChange() {
+            @Override
+            public void onChange(boolean type) {
+                if(type){
+                    snackbar.dismiss();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!btnPlayPause.isEnabled()) btnPlayPause.setEnabled(true);
+                        }
+                    });
+
+
+                } else {
+                    snackbar.show();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (btnPlayPause.isEnabled())btnPlayPause.setEnabled(false);
+                        }
+                    });
+                    if (statusPlay.equals("play")) {
+                        callRadio();
+                        pauseRadio();
+                    }
+                }
+            }
+        });
 
         initUI();
         bottomNav();
 
+    }
+
+    private void initSnackbar() {
+        snackbar = Snackbar.make(findViewById(android.R.id.content), " ", Snackbar.LENGTH_INDEFINITE);
+        custom_view = getLayoutInflater().inflate(R.layout.custom_snackbar, null);
+
+        snackbar.getView().setBackgroundColor(Color.TRANSPARENT);
+        Snackbar.SnackbarLayout snackBarView = (Snackbar.SnackbarLayout) snackbar.getView();
+        snackBarView.setPadding(0, 0, 0, 0);
+        (custom_view.findViewById(R.id.btn_koneksi_on)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // for android Q and above
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    Intent panelIntent = new
+                            Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY);
+                    startActivityForResult(panelIntent, 0);
+                } else {
+                    // for previous android version
+                    WifiManager wifiManager = (WifiManager)
+                            getApplicationContext().getSystemService(WIFI_SERVICE);
+                    wifiManager.setWifiEnabled(true);
+                }
+            }
+        });
+
+        snackBarView.addView(custom_view, 0);
     }
 
     private void initUI() {
@@ -61,12 +130,7 @@ public class MainActivity extends Activity implements ConnectivityReceiver.Conne
         rotate.setRepeatCount(Animation.INFINITE);
         rotate.setInterpolator(new LinearInterpolator());
 
-        btnPlayPause = findViewById(R.id.btnPlayPause);
 
-        btnShare = findViewById(R.id.btnShare);
-        imgRotation = (ImageView) findViewById(R.id.imgRotation);
-
-        btnShare = findViewById(R.id.btnShare);
         btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -168,41 +232,16 @@ public class MainActivity extends Activity implements ConnectivityReceiver.Conne
         });
     }
 
-    // Method to manually check connection status
-    private void checkConnection() {
-        boolean isConnected = ConnectivityReceiver.isConnected();
-        showSnack(isConnected);
-    }
-
-    @Override
-    public void onNetworkConnectionChanged(boolean isConnected) {
-        showSnack(isConnected);
-    }
-
-    // Showing the status in Snackbar
-    private void showSnack(boolean isConnected) {
-        String message = "Maaf, anda tidak terhubung dengan internet.";
-        if (isConnected) {
-
-        } else {
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-        }
-
-
-    }
 
     @Override
     protected void onStart() {
         super.onStart();
-        checkConnection();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        // register connection status listener
-        MyApplication.getInstance().setConnectivityListener(this);
     }
 
 }
