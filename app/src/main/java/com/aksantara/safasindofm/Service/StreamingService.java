@@ -4,26 +4,20 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.media.MediaPlayer;
-import android.net.Uri;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import com.aksantara.safasindofm.MainActivity;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.metadata.Metadata;
 
 public class StreamingService extends Service {
 
@@ -37,8 +31,14 @@ public class StreamingService extends Service {
     private final String url = "http://radio.safasindo.com:7044/;stream.pls";
     private final String name = "RADIO SAFASINDO 98.2 FM";
 
+    Context context;
+    private SharedPreferences sharedPref;
+
     @Override
     public void onCreate() {
+
+        context = getApplicationContext();
+        sharedPref = context.getSharedPreferences("safasindo", Context.MODE_PRIVATE);
 
         simpleExoPlayer = new SimpleExoPlayer.Builder(this).build();
 
@@ -58,13 +58,46 @@ public class StreamingService extends Service {
         } else if (intent.getAction() != null && intent.getAction().equals("playpause")) {
             if (simpleExoPlayer.isPlaying()) {
                 simpleExoPlayer.pause();
+                MainActivity.pauseRadio();
             } else {
                 playMedia();
+                MainActivity.playRadio();
+            }
+        } else {
+            if (intent.getExtras().getString("status").equals("pause")) {
+                if (!simpleExoPlayer.isPlaying()) {
+                    simpleExoPlayer.play();
+                }
+            } else if (intent.getExtras().getString("status").equals("play")) {
+                pauseMedia();
             }
         }
 
+        runStatus();
+
 
         return START_STICKY;
+    }
+
+    private void runStatus() {
+        int delay = 800;
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                if (simpleExoPlayer.isPlaying()) {
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putBoolean("statusPlay", true);
+                    editor.apply();
+                } else {
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putBoolean("statusPlay", false);
+                    editor.apply();
+                }
+
+                runStatus();
+            }
+        },delay);
     }
 
     @Override
@@ -77,6 +110,12 @@ public class StreamingService extends Service {
             simpleExoPlayer.release();
         }
         hideNotif();
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean("statusPlay", false);
+        editor.apply();
+
+        MainActivity.pauseRadio();
     }
 
     private void playMedia() {
