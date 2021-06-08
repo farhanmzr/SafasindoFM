@@ -1,16 +1,12 @@
-package com.aksantara.safasindofm;
+package com.aksantara.safasindofm.Activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
-import android.widget.Toast;
 
-import java.io.IOException;
+import com.aksantara.safasindofm.R;
 
 public class SplashScreenActivity extends AppCompatActivity {
 

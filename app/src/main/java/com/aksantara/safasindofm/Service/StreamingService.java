@@ -16,7 +16,7 @@ import android.telephony.TelephonyManager;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.aksantara.safasindofm.MainActivity;
+import com.aksantara.safasindofm.Activity.MainActivity;
 import com.aksantara.safasindofm.R;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;

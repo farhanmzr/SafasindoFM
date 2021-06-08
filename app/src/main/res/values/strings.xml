@@ -2,5 +2,23 @@
     <string name="app_name">SafasindoFM</string>
     <string name="radio_berita_online_dari_payakumbuh_sumatera_barat_pt_radio_suara_safasindo_utama"><![CDATA[Radio & Berita Online dari Payakumbuh Sumatera Barat PT. Radio Suara Safasindo Utama]]></string>
 
-
+    <string name="version_app">Versi 1.0</string>
+    <string name="safasindo_98_2_fm">SAFASINDO 98.2 FM</string>
+    <string name="lebih_sejuk_didengar_umat">Lebih Sejuk Didengar Umat</string>
+    <string name="alamat_kantor_studio">Alamat Kantor / Studio</string>
+    <string name="jl_prof_dr_hamka_no_14_kelurahan_kaning_bukit_payakumbuh">Jl. Prof DR Hamka no 14 Kelurahan Kaning Bukit, Payakumbuh</string>
+    <string name="telepon_studio">Telepon Studio</string>
+    <string name="_0752_93123_on_air_0752_7000499">0752 – 93123 On Air 0752 7000499</string>
+    <string name="email">Email</string>
+    <string name="sahabat_safasindo_com">sahabat@safasindo.com</string>
+    <string name="daerah_pemancaran">Daerah Pemancaran</string>
+    <string name="kota_payakumbuh_kab_limapuluh_kota_kab_tanah_datar_dan_kab_agam_kota_bukit_tinggi">Kota Payakumbuh, Kab. Limapuluh Kota, Kab. Tanah datar, dan Kab. Agam. Kota Bukit Tinggi</string>
+    <string name="mau_informasi_lebih_lengkap_tentang_safasindo_fm">Mau informasi lebih lengkap tentang SAFASINDO FM ?</string>
+    <string name="instagram">INSTAGRAM</string>
+    <string name="facebook">FACEBOOK</string>
+    <string name="youtube">YOUTUBE</string>
+    <string name="berita">BERITA</string>
+    <string name="tidak_ada_koneksi">Tidak ada Koneksi</string>
+    <string name="silakan_periksa_jaringan_data_anda">Silakan periksa Jaringan Data anda</string>
+    <string name="aktifkan">AKTIFKAN</string>
 </resources>

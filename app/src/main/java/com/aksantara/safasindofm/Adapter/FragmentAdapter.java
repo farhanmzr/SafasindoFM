@@ -29,19 +29,19 @@ public class FragmentAdapter extends FragmentPagerAdapter {
 
         switch (position) {
             case 0:
-                fragment = new InstagramFragment();
+                fragment = new BeritaFragment();
                 return fragment;
 
             case 1:
-                fragment = new FacebookFragment();
+                fragment = new InstagramFragment();
                 return fragment;
 
             case 2:
-                fragment = new YoutubeFragment();
+                fragment = new FacebookFragment();
                 return fragment;
 
             case 3:
-                fragment = new BeritaFragment();
+                fragment = new YoutubeFragment();
                 return fragment;
 
             default:

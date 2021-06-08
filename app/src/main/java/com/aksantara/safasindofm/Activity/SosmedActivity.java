@@ -1,4 +1,4 @@
-package com.aksantara.safasindofm;
+package com.aksantara.safasindofm.Activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.aksantara.safasindofm.Adapter.FragmentAdapter;
+import com.aksantara.safasindofm.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 

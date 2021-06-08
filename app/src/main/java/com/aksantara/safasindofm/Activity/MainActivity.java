@@ -1,4 +1,4 @@
-package com.aksantara.safasindofm;
+package com.aksantara.safasindofm.Activity;
 
 import androidx.annotation.NonNull;
 
@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.aksantara.safasindofm.R;
 import com.aksantara.safasindofm.Service.NetworkUtils;
 import com.aksantara.safasindofm.Service.StreamingService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -30,7 +31,7 @@ public class MainActivity extends Activity {
     private static ImageView imgRotation;
     private static ImageView btnPlayPause;
     private static String statusPlay = "pause";
-    private ImageView btnShare;
+    private ImageView btnShare, btnRating;
 
     private String url = "http://radio.safasindo.com:7044/;stream.pls";
     private String name = "RADIO SAFASINDO 98.2 FM";
@@ -56,6 +57,7 @@ public class MainActivity extends Activity {
         btnShare = findViewById(R.id.btnShare);
         imgRotation = (ImageView) findViewById(R.id.imgRotation);
         btnShare = findViewById(R.id.btnShare);
+        btnRating = findViewById(R.id.btnRating);
 
         initSnackbar();
 
@@ -194,9 +196,7 @@ public class MainActivity extends Activity {
         }
         Intent serviceOn = new Intent(this, StreamingService.class);
         serviceOn.putExtras(bundle);
-
         startService(serviceOn);
-        Toast.makeText(this, url, Toast.LENGTH_SHORT).show();
     }
 
     private void bottomNav() {

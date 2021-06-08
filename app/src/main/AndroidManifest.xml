@@ -16,10 +16,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SafasindoFM">
-        <activity android:name=".SosmedActivity"></activity>
-        <activity android:name=".ProfileActivity" />
+        <activity android:name=".Activity.SosmedActivity"></activity>
+        <activity android:name=".Activity.ProfileActivity" />
         <activity
-            android:name=".SplashScreenActivity"
+            android:name=".Activity.SplashScreenActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,7 +29,7 @@
         </activity>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".Activity.MainActivity"
             android:screenOrientation="portrait" />
 
         <!-- Update sultannamja -->

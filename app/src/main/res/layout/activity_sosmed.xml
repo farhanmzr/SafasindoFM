@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    tools:context=".SosmedActivity">
+    tools:context=".Activity.SosmedActivity">
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation"
@@ -43,25 +43,25 @@
             android:id="@+id/tabDiproses"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="INSTAGRAM" />
+            android:text="@string/berita" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabSelesai"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="FACEBOOK" />
+            android:text="@string/instagram"/>
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabYoutube"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="YOUTUBE" />
+            android:text="@string/facebook" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabBerita"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="BERITA" />
+            android:text="@string/youtube" />
 
     </com.google.android.material.tabs.TabLayout>
 

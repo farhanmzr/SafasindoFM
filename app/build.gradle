@@ -3,6 +3,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('E:\\Work\\Aksantara Digital\\KeyStore\\RADIO SAFASINDO\\release-keystore.jks')
+            storePassword 'keysafasindo'
+            keyAlias 'release'
+            keyPassword 'keysafasindo'
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
@@ -20,6 +28,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable false
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
