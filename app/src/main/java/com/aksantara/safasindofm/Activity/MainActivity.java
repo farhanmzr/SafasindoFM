@@ -1,17 +1,26 @@
 package com.aksantara.safasindofm.Activity;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.MenuItem;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
@@ -26,9 +35,13 @@ import com.aksantara.safasindofm.Service.StreamingService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
+import me.bogerchan.niervisualizer.NierVisualizerManager;
+import me.bogerchan.niervisualizer.renderer.IRenderer;
+import me.bogerchan.niervisualizer.renderer.columnar.ColumnarType1Renderer;
+import me.bogerchan.niervisualizer.renderer.line.LineRenderer;
+
 public class MainActivity extends Activity {
 
-    private static ImageView imgRotation;
     private static ImageView btnPlayPause;
     private static String statusPlay = "pause";
     private ImageView btnShare, btnRating;
@@ -45,6 +58,9 @@ public class MainActivity extends Activity {
     Button btn_on_koneksi;
     View custom_view;
 
+    static SurfaceView svWafe;
+    static final NierVisualizerManager visualizerManager = new NierVisualizerManager();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,9 +71,18 @@ public class MainActivity extends Activity {
 
         btnPlayPause = findViewById(R.id.btnPlayPause);
         btnShare = findViewById(R.id.btnShare);
-        imgRotation = (ImageView) findViewById(R.id.imgRotation);
         btnShare = findViewById(R.id.btnShare);
         btnRating = findViewById(R.id.btnRating);
+        svWafe = findViewById(R.id.sv_wave);
+
+        svWafe.setZOrderOnTop(true);    // necessary
+        SurfaceHolder sfhTrackHolder = svWafe.getHolder();
+        sfhTrackHolder.setFormat(PixelFormat.TRANSPARENT);
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.RECORD_AUDIO}, 1);
+        }
+
 
         initSnackbar();
 
@@ -96,6 +121,22 @@ public class MainActivity extends Activity {
         initUI();
         bottomNav();
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1) {
+                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(
+                            this,
+                            "SafasindoFM membutuhkan izin Merekam, tolong izinkan untuk menampilkan visualize efek!",
+                            Toast.LENGTH_LONG
+                    ).show();
+                    finish();
+                }
+        }
     }
 
     private void initSnackbar() {
@@ -149,6 +190,7 @@ public class MainActivity extends Activity {
                 } else if (statusPlay.equals("pause")) {
                     callRadio();
                     playRadio();
+
                 }
             }
         });
@@ -166,23 +208,28 @@ public class MainActivity extends Activity {
     public static void pauseRadio() {
         statusPlay = "pause";
 
-        imgRotation.clearAnimation();
+        //imgRotation.clearAnimation();
         btnPlayPause.setImageResource(R.drawable.ic_btn_play);
 
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean("statusPlay", false);
         editor.apply();
+
+        visualizerManager.pause();
     }
 
     public static void playRadio() {
         statusPlay = "play";
 
-        imgRotation.startAnimation(rotate);
+        //imgRotation.startAnimation(rotate);
         btnPlayPause.setImageResource(R.drawable.ic_btn_stop);
 
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean("statusPlay", true);
         editor.apply();
+
+        final int state = visualizerManager.init(0);
+        visualizerManager.start(svWafe, new IRenderer[]{new ColumnarType1Renderer()});
     }
 
     private void callRadio() {
