@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.aksantara.safasindofm.BuildConfig;
 import com.aksantara.safasindofm.R;
 import com.aksantara.safasindofm.Service.NetworkUtils;
 import com.aksantara.safasindofm.Service.StreamingService;
@@ -48,6 +50,7 @@ public class MainActivity extends Activity {
 
     private String url = "http://radio.safasindo.com:7044/;stream.pls";
     private String name = "RADIO SAFASINDO 98.2 FM";
+    private String urlShare = "https://play.google.com/store/apps/details?id=com.aksantara.safasindofm";
 
     static RotateAnimation rotate;
 
@@ -71,8 +74,28 @@ public class MainActivity extends Activity {
 
         btnPlayPause = findViewById(R.id.btnPlayPause);
         btnShare = findViewById(R.id.btnShare);
-        btnShare = findViewById(R.id.btnShare);
         btnRating = findViewById(R.id.btnRating);
+        btnShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "My application name");
+                String shareMessage= "\nLet me recommend you this application\n";
+                shareMessage = shareMessage + "https://play.google.com/store/apps/details?id=" + BuildConfig.APPLICATION_ID +"\n";
+                shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+                startActivity(Intent.createChooser(shareIntent, "Bagikan Aplikasi ke"));
+            }
+        });
+        btnRating.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String url = urlShare;
+                Uri uriUrl = Uri.parse(url);
+                Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+                startActivity(launchBrowser);
+            }
+        });
         svWafe = findViewById(R.id.sv_wave);
 
         svWafe.setZOrderOnTop(true);    // necessary
@@ -174,12 +197,7 @@ public class MainActivity extends Activity {
         rotate.setInterpolator(new LinearInterpolator());
 
 
-        btnShare.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-            }
-        });
         btnPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

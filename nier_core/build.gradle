@@ -2,6 +2,14 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('E:\\Work\\Aksantara Digital\\KeyStore\\RADIO SAFASINDO\\release-keystore.jks')
+            storePassword 'keysafasindo'
+            keyAlias 'release'
+            keyPassword 'keysafasindo'
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
